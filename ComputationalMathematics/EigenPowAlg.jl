@@ -1,61 +1,64 @@
 using LinearAlgebra
 
-function powerAlgorithm(A, X, K, delta, iter::Int64=1)
+## Power function ##
+# Input: A, X, delta
+# Output: k, (v^(k)), (Av^(k)), m_(k+1), lambda value, result
+function powerAlgorithm(A, X, delta, Y::Vector=Vector{Float64}[], K::Array{Float64}=Float64[], iter::Int64=1)
+    X isa Vector{Int64} ? xLoc = Vector{Float64}[X] : xLoc = X
+    yLoc = Y
+    kLoc = K
+
     # Calculate Y = AX
-    Y = A*X[iter]
+    Y = A*xLoc[iter]
+
     # Find value of largest element in magnitude
-    Kval = Y[argmax(abs.(Y))]
-    # Calculate fresh value X
-    v1 = (1/Kval)*Y
-    push!(X, v1)
-    push!(K, Kval)
-    #@show Y
+    kVal = Y[argmax(abs.(Y))]
+
+    # Calculate the next value of X and store it
+    push!(xLoc, (1/kVal)*Y)
+
+    # Store other data
+    push!(yLoc, Y)
+    push!(kLoc, kVal)
 
     # Begin error checking after second recursion
     if iter > 1
-        @show abs(K[iter]), abs(K[iter-1]), abs(K[iter] - K[iter-1])
-        if abs(K[iter] - K[iter-1]) < delta
-            push!(lambda, Kval)
-            println()
-            @show Kval
-            @show v1
-            # Check if Av1 = lambda1v1
-            check = round.(Kval*v1, digits = 2)
-            @show check
-            println()
-        else
-            powerAlgorithm(A, X, K, delta, iter+1)
+        diff = abs(kLoc[iter] - kLoc[iter-1])
+
+        # If the difference is less than the error, stop running else continue to next iteration
+        if diff < delta
+            # Check if A*v = lambda*v
+            result = round.(kVal*last(X), digits = 2)
+            return iter-1, xLoc, yLoc, kLoc, kVal, (round.(kVal, digits = 2), round.(last(X), digits = 2), result)
         end
-    else
-        powerAlgorithm(A, X, K, delta, iter+1)
     end
+
+    powerAlgorithm(A, xLoc, delta, yLoc, kLoc, iter+1)
 end
 
-# Define square matrix X
-global A = [1 2 -1; 1 0 1; 4 -4 5]
-
-### First to find the largest magnitude eigenvalue ###
-
-# Store v_0 up to v_n in array X
-global X = [[0.0; 0.0; 1.0]]
-# Store K values in array for referencing a point in recursion
-global K = Float64[];
 # Store lambda values in array
-global lambda = Float64[];
-# Set delta (error) value
-global delta = 0.001
+lambda = Float64[];
+# Define square matrix X
+A = [1 2 -1; 1 0 1; 4 -4 5]
+# Define v0 under the name of X
+X = [0; 0; 1]
+# Define delta (error)
+delta = 1
+
+### a) First to find the largest magnitude eigenvalue ###
 
 # Run power algorithm
-powerAlgorithm(A, X, K, delta)
+k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm(A, X, delta)
+# Push lambda value returned to the global storage for lambda values
+push!(lambda, lambdaValue)
+@show kValues; @show lambda; @show check; println()
 
-### Now we will find the smallest eigenvalue and the corresponding eigenvector ###
+### b) Now we will find the smallest eigenvalue and the corresponding eigenvector ###
 
 # Calculate the shifted matrix B = A_shifted
-global B = A-(lambda[1]*I)
-# Re-define the X array from before but with a new v_0# Store v_0 up to v_n in array X
-global X = [[0.0; 1.0; 0.0]] 
-# Re-define the K values array
-global K = Float64[];
+B = A-(lambda[1]*I)
+X = [0; 1; 0]
 
-powerAlgorithm(B, X, K, delta)
-
+k, vK, AvK, kValues, lambdaValues, check = powerAlgorithm(B, X, delta)
+push!(lambda, lambdaValue)
+@show kValues; @show lambda; @show check; println()
