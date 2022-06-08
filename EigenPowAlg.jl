@@ -1,54 +1,53 @@
-import LinearAlgebra: norm
+using LinearAlgebra
+
+function powerAlgorithm(A, X, K, delta, iter::Int64=1)
+    # Calculate Y = AX
+    Y = A*X[iter]
+    # Find value of largest element in magnitude
+    Kval = Y[argmax(abs.(Y))]
+    # Calculate fresh value X
+    push!(X, (1/Kval)*Y)
+    push!(K, Kval)
+    @show Y
+
+    # Begin error checking after second recursion
+    if iter > 1
+        @show abs(K[iter] - K[iter-1])
+        if abs(K[iter] - K[iter-1]) < delta
+            push!(lambda, round(Kval))
+            @show lambda;
+        else
+            powerAlgorithm(A, X, K, delta, iter+1)
+        end
+    else
+        powerAlgorithm(A, X, K, delta, iter+1)
+    end
+end
 
 # Define square matrix X
-A = [1 2 -1; 1 0 1; 4 -4 5]
-X = [[0.0; 0.0; 1.0]]
-delta = 0.001
+global A = [1 2 -1; 1 0 1; 4 -4 5]
 
-global i = 1;
+### First to find the largest magnitude eigenvalue ###
 
-while i < 8
-    # Calculate Y = AX
-    Y = A*X[i]
-    global i += 1;
-    # Find value of largest element in magnitude
-    K = Y[argmax(abs.(Y))]
-    # Calculate fresh value X
-    @show round(K, digits = 4)
-    push!(X, (1/K)*Y)
+# Store v_0 up to v_n in array X
+global X = [[0.0; 0.0; 1.0]]
+# Store K values in array for referencing a point in recursion
+global K = Float64[];
+# Store lambda values in array
+global lambda = Int64[];
+# Set delta (error) value
+global delta = 0.001
 
-    @show (norm(X[i]) - norm(X[i-1])) < delta
-end
+# Run power algorithm
+powerAlgorithm(A, X, K, delta)
 
+### Now we will find the smallest eigenvalue and the corresponding eigenvector ###
 
-#=
-while true
-    println()
-    #println("k: ", iter)
-    println("(v^(", iter, "))^T: ", round.(X, digits = 3))
+# Calculate the shifted matrix B = A_shifted
+global B = A-(lambda[1]*I)
+# Re-define the X array from before but with a new v_0# Store v_0 up to v_n in array X
+global X = [[0.0; 1.0; 0.0]] 
+# Re-define the K values array
+global K = Float64[];
 
-    magX1 = norm(X)
-
-    # Calculate Y = AX
-    global Y = A*X
-
-    # Find value of largest element in magnitude
-    global K = Y[argmax(abs.(Y))]
-
-    # Calculate fresh value X
-    global X = (1/K)*Y
-    magX2 = norm(X)
-
-    println("(Av^(", iter, "))^T: ", round.(Y, digits = 3))
-    println("m_(", iter+1, "): ", round(K, digits = 3))
-    
-    global iter += 1
-
-    println()
-    (magX2 - magX1) > delta || break
-end
-
-println(iter)
-global Y = A*X
-println(round.(Y, digits = 3))
-=#
+powerAlgorithm(B, X, K, delta)
