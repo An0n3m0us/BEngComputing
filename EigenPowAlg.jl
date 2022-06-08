@@ -6,16 +6,23 @@ function powerAlgorithm(A, X, K, delta, iter::Int64=1)
     # Find value of largest element in magnitude
     Kval = Y[argmax(abs.(Y))]
     # Calculate fresh value X
-    push!(X, (1/Kval)*Y)
+    v1 = (1/Kval)*Y
+    push!(X, v1)
     push!(K, Kval)
-    @show Y
+    #@show Y
 
     # Begin error checking after second recursion
     if iter > 1
-        @show abs(K[iter] - K[iter-1])
+        @show abs(K[iter]), abs(K[iter-1]), abs(K[iter] - K[iter-1])
         if abs(K[iter] - K[iter-1]) < delta
-            push!(lambda, round(Kval))
-            @show lambda;
+            push!(lambda, Kval)
+            println()
+            @show Kval
+            @show v1
+            # Check if Av1 = lambda1v1
+            check = round.(Kval*v1, digits = 2)
+            @show check
+            println()
         else
             powerAlgorithm(A, X, K, delta, iter+1)
         end
@@ -34,7 +41,7 @@ global X = [[0.0; 0.0; 1.0]]
 # Store K values in array for referencing a point in recursion
 global K = Float64[];
 # Store lambda values in array
-global lambda = Int64[];
+global lambda = Float64[];
 # Set delta (error) value
 global delta = 0.001
 
@@ -51,3 +58,4 @@ global X = [[0.0; 1.0; 0.0]]
 global K = Float64[];
 
 powerAlgorithm(B, X, K, delta)
+
