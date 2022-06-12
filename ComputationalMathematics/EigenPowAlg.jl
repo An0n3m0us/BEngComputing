@@ -43,7 +43,7 @@ A = [1 2 -1; 1 0 1; 4 -4 5]
 # Define v0 under the name of X
 X = [0; 0; 1]
 # Define delta (error)
-delta = 1
+delta = 0.001
 
 ### a) First to find the largest magnitude eigenvalue ###
 
@@ -59,6 +59,11 @@ push!(lambda, lambdaValue)
 B = A-(lambda[1]*I)
 X = [0; 1; 0]
 
-k, vK, AvK, kValues, lambdaValues, check = powerAlgorithm(B, X, delta)
+k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm(B, X, delta)
+push!(lambda, lambdaValue)
+@show kValues; @show lambda; @show check; println()
+
+
+k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm([-2 -6 0; 2 7 0; 1 2 -1], [0, 1, 1], 0.05)
 push!(lambda, lambdaValue)
 @show kValues; @show lambda; @show check; println()
