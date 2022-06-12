@@ -36,34 +36,36 @@ function powerAlgorithm(A, X, delta, Y::Vector=Vector{Float64}[], K::Array{Float
     powerAlgorithm(A, xLoc, delta, yLoc, kLoc, iter+1)
 end
 
-# Store lambda values in array
-lambda = Float64[];
-# Define square matrix X
-A = [1 2 -1; 1 0 1; 4 -4 5]
-# Define v0 under the name of X
-X = [0; 0; 1]
-# Define delta (error)
-delta = 0.001
+global deltaValues = [0.05, 0.005, 0.001]
 
-### a) First to find the largest magnitude eigenvalue ###
+for i = 1:length(deltaValues)
+    # Store lambda values in array
+    lambda = Float64[]
+    # Define square matrix X
+    A = [-2 -6 0; 2 7 0; 1 2 -1]
+    # Define v0 under the name of X
+    X = [0; 1; 1]
+    # Define delta (error)
+    delta = deltaValues[i]
 
-# Run power algorithm
-k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm(A, X, delta)
-# Push lambda value returned to the global storage for lambda values
-push!(lambda, lambdaValue)
-@show kValues; @show lambda; @show check; println()
+    println("Using error of ", delta)
 
-### b) Now we will find the smallest eigenvalue and the corresponding eigenvector ###
+    ### a) First to find the largest magnitude eigenvalue ###
 
-# Calculate the shifted matrix B = A_shifted
-B = A-(lambda[1]*I)
-X = [0; 1; 0]
+    # Run power algorithm
+    k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm(A, X, delta)
+    # Push lambda value returned to the global storage for lambda values
+    push!(lambda, round(lambdaValue, digits=4))
 
-k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm(B, X, delta)
-push!(lambda, lambdaValue)
-@show kValues; @show lambda; @show check; println()
+    ### b) Now we will find the smallest eigenvalue and the corresponding eigenvector ###
 
+    # Calculate the shifted matrix B = A_shifted
+    B = A-(lambda[1]*I)
 
-k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm([-2 -6 0; 2 7 0; 1 2 -1], [0, 1, 1], 0.05)
-push!(lambda, lambdaValue)
-@show kValues; @show lambda; @show check; println()
+    k, vK, AvK, kValues, lambdaValue, check = powerAlgorithm(B, X, delta)
+    # Push lambda value returned to the global storage for lambda values
+    push!(lambda, round(lambdaValue, digits=4))
+
+    # Show the output
+    @show lambda; println()
+end
